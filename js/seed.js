@@ -20,13 +20,13 @@ const SEED = {
     { id: 7, concepto: 'Gastos varios', monto: 200000, es_uf: false },
     { id: 8, concepto: 'Uñas', monto: 20000, es_uf: false }
   ],
-  // Fondo Solidario: saldos TRAS abono de $1.100.000 (imputado a más antiguo primero)
-  // MO-2024 original 2.469.817 - 1.100.000 = 1.369.817
+  // Fondo Solidario: solo tramos a pagar (MO-2024, MO-2025, CP-2026).
+  // LP-SOLIDARIO excluido del registro (probable condonación 2029, Ley 19.287).
+  // Saldos TRAS abono de $1.100.000 imputado a MO-2024: 2.469.817 - 1.100.000 = 1.369.817
   deudas_solidario: [
-    { id: 'MO-2024', tramo: 'MO-SOLIDARIO 2024', vencimiento: '2025-05-31', original: 2469817, saldo: 1369817, orden: 1, excluido: false },
-    { id: 'MO-2025', tramo: 'MO-SOLIDARIO 2025', vencimiento: '2026-05-31', original: 1325721, saldo: 1325721, orden: 2, excluido: false },
-    { id: 'LP',      tramo: 'LP-SOLIDARIO',       vencimiento: null,         original: 8542107, saldo: 8542107, orden: 3, excluido: true  },
-    { id: 'CP-2026', tramo: 'CP-SOLIDARIO 2026',  vencimiento: '2027-05-31', original: 1758333, saldo: 1758333, orden: 4, excluido: false }
+    { id: 'MO-2024', tramo: 'MO-SOLIDARIO 2024', vencimiento: '2025-05-31', original: 2469817, saldo: 1369817, orden: 1 },
+    { id: 'MO-2025', tramo: 'MO-SOLIDARIO 2025', vencimiento: '2026-05-31', original: 1325721, saldo: 1325721, orden: 2 },
+    { id: 'CP-2026', tramo: 'CP-SOLIDARIO 2026',  vencimiento: '2027-05-31', original: 1758333, saldo: 1758333, orden: 3 }
   ],
   metas: {
     birmingham: {

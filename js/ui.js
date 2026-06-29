@@ -78,7 +78,7 @@ const UI = {
         <div class="card-title">Plan asignación mensual</div>
         <ul class="row-list">
           <li class="row-item">
-            <span class="row-label">1. Fondo Solidario</span>
+            <span class="row-label">1. Fondo Solidario <span class="chip" style="font-size:10px">2024·2025·2026</span></span>
             <span class="row-amount neg">${this.clp(plan.solidario)}</span>
           </li>
           <li class="row-item">
@@ -95,17 +95,9 @@ const UI = {
       <!-- Fondo Solidario -->
       <div class="card">
         <div class="card-title">Fondo Solidario (U. Tarapacá)</div>
-        <div class="stat-grid" style="margin-bottom:0">
-          <div>
-            <div class="stat-label">Saldo total</div>
-            <div class="stat-value orange" style="font-size:15px">${this.clp(saldoTot)}</div>
-          </div>
-          <div>
-            <div class="stat-label">Prioritario (excl. LP)</div>
-            <div class="stat-value red" style="font-size:15px">${this.clp(saldoPrior)}</div>
-          </div>
-        </div>
-        <div class="text-muted mt-4">Condonación saldo remanente: 2029 · Ley 19.287</div>
+        <div class="stat-label">Saldo pendiente</div>
+        <div class="card-big-number" style="color:var(--warning)">${this.clp(saldoTot)}</div>
+        <div class="card-sub">MO-2024 · MO-2025 · CP-2026 · Ley 19.287</div>
       </div>
 
       <!-- Metas -->
@@ -256,18 +248,15 @@ const UI = {
   renderDeudas() {
     const deudas    = Store.getDeudasSolidario();
     const saldoTot  = Calc.saldoTotalSolidario();
-    const saldoPrio = Calc.saldoPrioritarioSolidario();
     const sup       = Store.getSupuestos();
 
     const tramosHtml = deudas.map(d => {
       const pctPagado = Calc.porcentaje(d.original - d.saldo, d.original);
       const badge = d.saldo === 0
         ? '<span class="badge badge-green">SALDADO</span>'
-        : d.excluido
-          ? '<span class="badge badge-gray">excluido del plan</span>'
-          : d.vencimiento && new Date(d.vencimiento) < new Date()
-            ? '<span class="badge badge-red">VENCIDO</span>'
-            : '<span class="badge badge-orange">pendiente</span>';
+        : d.vencimiento && new Date(d.vencimiento) < new Date()
+          ? '<span class="badge badge-red">VENCIDO</span>'
+          : '<span class="badge badge-orange">pendiente</span>';
       return `
         <div style="margin-bottom:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -285,15 +274,10 @@ const UI = {
 
     return `
       <!-- Resumen -->
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-label">Saldo total</div>
-          <div class="stat-value orange" style="font-size:16px">${this.clp(saldoTot)}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Prioritario (excl. LP)</div>
-          <div class="stat-value red" style="font-size:16px">${this.clp(saldoPrio)}</div>
-        </div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="stat-label">Saldo pendiente Fondo Solidario</div>
+        <div class="card-big-number" style="color:var(--warning)">${this.clp(saldoTot)}</div>
+        <div class="card-sub">MO-2024 · MO-2025 · CP-2026</div>
       </div>
 
       <!-- Tramos -->
@@ -303,7 +287,6 @@ const UI = {
         <div class="divider"></div>
         <div class="text-muted">
           ⚖️ Ley 19.287: pago anual = 5% renta año anterior. Inicio 2014 → condonación saldo remanente 2029.<br>
-          LP-SOLIDARIO excluido del plan (probable condonación 2029).
         </div>
       </div>
 
@@ -319,7 +302,7 @@ const UI = {
             <label class="form-label">Monto (CLP)</label>
             <input type="number" class="form-input" id="ab-monto" placeholder="0" min="1" required>
           </div>
-          <div class="text-muted">Se imputará automáticamente al tramo más antiguo (MO-2024 → MO-2025 → CP-2026). LP-SOLIDARIO excluido.</div>
+          <div class="text-muted">Se imputará automáticamente al tramo más antiguo primero: MO-2024 → MO-2025 → CP-2026.</div>
           <button type="submit" class="btn btn-primary">Registrar abono</button>
         </form>
       </div>

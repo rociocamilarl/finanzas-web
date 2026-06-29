@@ -15,24 +15,20 @@ const Calc = {
     return this.totalIngresos() - this.totalGastosFijos();
   },
 
-  // Saldo Fondo Solidario total (incluyendo LP)
+  // Saldo total Fondo Solidario (MO-2024 + MO-2025 + CP-2026)
   saldoTotalSolidario() {
     return Store.getDeudasSolidario().reduce((s, d) => s + d.saldo, 0);
   },
 
-  // Saldo prioritario (excluye LP-SOLIDARIO)
+  // Alias para compatibilidad con UI
   saldoPrioritarioSolidario() {
-    return Store.getDeudasSolidario()
-      .filter(d => !d.excluido)
-      .reduce((s, d) => s + d.saldo, 0);
+    return this.saldoTotalSolidario();
   },
 
-  // Aplica un abono al Fondo Solidario (tramo más antiguo primero, excluye LP)
+  // Aplica un abono al Fondo Solidario (tramo más antiguo primero)
   aplicarAbono(monto) {
     const deudas = Store.getDeudasSolidario();
-    const prioritarias = deudas
-      .filter(d => !d.excluido)
-      .sort((a, b) => a.orden - b.orden);
+    const prioritarias = deudas.slice().sort((a, b) => a.orden - b.orden);
 
     let resto = monto;
     for (const d of prioritarias) {
