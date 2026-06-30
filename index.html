@@ -49,6 +49,20 @@
     </nav>
   </div>
 
+  <!-- Pantalla de login -->
+  <div id="login-screen">
+    <div id="login-card">
+      <div class="login-icon">💰</div>
+      <h2>Controller Financiero</h2>
+      <p>Ingresa tu contraseña para continuar</p>
+      <form id="login-form">
+        <input type="password" id="login-pass" placeholder="Contraseña" autocomplete="current-password" autofocus>
+        <div id="login-error">Contraseña incorrecta</div>
+        <button type="submit">Entrar</button>
+      </form>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
   <script src="js/seed.js"></script>
@@ -56,11 +70,13 @@
   <script src="js/calc.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
 
   <script>
-    // Muestra mes actual en el header
     document.getElementById('header-mes').textContent =
       new Date().toLocaleDateString('es-CL', { month: 'short', year: 'numeric' });
+
+    document.addEventListener('DOMContentLoaded', () => Auth.init());
   </script>
 </body>
 </html>

@@ -261,6 +261,30 @@ const App = {
       reader.readAsText(file);
     });
 
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      if (!confirm('¿Cerrar sesión?')) return;
+      Auth.logout();
+    });
+
+    document.getElementById('form-pass').addEventListener('submit', async e => {
+      e.preventDefault();
+      const actual    = document.getElementById('pass-actual').value;
+      const nueva     = document.getElementById('pass-nueva').value;
+      const confirmar = document.getElementById('pass-confirmar').value;
+      if (!actual || !nueva) { this.toast('Completa todos los campos'); return; }
+      if (nueva !== confirmar) { this.toast('Las contraseñas no coinciden'); return; }
+      if (nueva.length < 6) { this.toast('Mínimo 6 caracteres'); return; }
+      const ok = await Auth.changePassword(actual, nueva);
+      if (ok) {
+        this.toast('✓ Contraseña actualizada');
+        document.getElementById('pass-actual').value = '';
+        document.getElementById('pass-nueva').value = '';
+        document.getElementById('pass-confirmar').value = '';
+      } else {
+        this.toast('Contraseña actual incorrecta');
+      }
+    });
+
     document.getElementById('btn-reset').addEventListener('click', () => {
       if (!confirm('¿Resetear TODOS los datos? Se perderán todos los movimientos registrados.')) return;
       Object.values({ ...localStorage }).forEach((_, i) => {});
@@ -282,4 +306,4 @@ const App = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => App.init());
+// App.init() es llamado por Auth después de verificar la contraseña

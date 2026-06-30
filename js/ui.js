@@ -474,6 +474,27 @@ const UI = {
       </div>
 
       <div class="card">
+        <div class="card-title">🔐 Cambiar contraseña</div>
+        <form id="form-pass" class="form-section">
+          <div class="form-group">
+            <label class="form-label">Contraseña actual</label>
+            <input type="password" class="form-input" id="pass-actual" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nueva contraseña</label>
+            <input type="password" class="form-input" id="pass-nueva" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar nueva contraseña</label>
+            <input type="password" class="form-input" id="pass-confirmar" placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary">Cambiar contraseña</button>
+        </form>
+        <div class="divider" style="margin-top:12px"></div>
+        <button class="btn btn-outline mt-4" id="btn-logout" style="margin-top:12px">Cerrar sesión</button>
+      </div>
+
+      <div class="card">
         <div class="card-title">⚠️ Zona de riesgo</div>
         <button class="btn btn-danger" id="btn-reset">Resetear todos los datos</button>
         <div class="text-muted" style="margin-top:6px">Esto borra todos los movimientos y vuelve a los datos iniciales.</div>
