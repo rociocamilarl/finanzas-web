@@ -7,13 +7,13 @@ const KEYS = {
   metas:            'fin_metas',
   plan:             'fin_plan',
   movimientos:      'fin_movimientos',
-  inicializado:     'fin_init_v5'
+  inicializado:     'fin_init_v6'
 };
 
 const Store = {
   init() {
     // Limpiar cualquier versión anterior para forzar re-seed con datos actualizados
-    const viejasVersiones = ['fin_init_v2','fin_init_v3','fin_init_v4'];
+    const viejasVersiones = ['fin_init_v2','fin_init_v3','fin_init_v4','fin_init_v5'];
     if (viejasVersiones.some(v => localStorage.getItem(v)) && !localStorage.getItem(KEYS.inicializado)) {
       ['fin_supuestos','fin_ingresos','fin_gastos_fijos','fin_deudas_solidario',
        'fin_metas','fin_plan','fin_movimientos',

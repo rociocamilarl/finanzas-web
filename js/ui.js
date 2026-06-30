@@ -53,20 +53,23 @@ const UI = {
       <!-- Resumen principal -->
       <div class="card">
         <div class="card-title">Resumen · ${mesLabel}</div>
-        <div class="stat-grid" style="margin-bottom:0">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:0">
           <div>
             <div class="stat-label">Ingresos</div>
-            <div class="stat-value green" style="font-size:16px">${this.clp(ingresos)}</div>
+            <div class="stat-value green" style="font-size:14px">${this.clp(ingresos)}</div>
           </div>
           <div>
             <div class="stat-label">Gastos fijos</div>
-            <div class="stat-value red" style="font-size:16px">${this.clp(gastosFij)}</div>
+            <div class="stat-value red" style="font-size:14px">${this.clp(gastosFij)}</div>
+          </div>
+          <div>
+            <div class="stat-label">Teórico</div>
+            <div class="stat-value blue" style="font-size:14px">${this.clp(saldo)}</div>
           </div>
         </div>
         <div class="divider"></div>
         <div class="stat-label">Saldo real en cuenta</div>
         <div class="card-big-number ${saldoReal >= 0 ? '' : 'red'}">${this.clp(saldoReal)}</div>
-        <div class="card-sub">Teórico (ingresos − gastos fijos): ${this.clp(saldo)}</div>
         <div class="progress-wrap mt-4">
           <div class="progress-header">
             <span>% gasto / ingreso</span><span>${this.pct(pctGasto)}</span>

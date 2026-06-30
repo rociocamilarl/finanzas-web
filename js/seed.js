@@ -63,24 +63,6 @@ const SEED = {
       descripcion: 'Saldo real en cuenta',
       monto: 755233,
       destino: null
-    },
-    {
-      id: 2,
-      fecha: '2026-06-08',
-      tipo: 'Pago',
-      categoria: 'Fondo Solidario',
-      descripcion: 'Abono Fondo Solidario (imputado a MO-2024)',
-      monto: -300000,
-      destino: 'solidario'
-    },
-    {
-      id: 3,
-      fecha: '2026-06-10',
-      tipo: 'Pago',
-      categoria: 'Fondo Solidario',
-      descripcion: 'Abono Fondo Solidario (imputado a MO-2024)',
-      monto: -800000,
-      destino: 'solidario'
     }
   ]
 };
