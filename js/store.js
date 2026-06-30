@@ -7,31 +7,25 @@ const KEYS = {
   metas:            'fin_metas',
   plan:             'fin_plan',
   movimientos:      'fin_movimientos',
-  inicializado:     'fin_init_v7'
+  inicializado:     'fin_init_v8'
 };
 
 const Store = {
   init() {
-    const oldKeys = ['fin_init_v2','fin_init_v3','fin_init_v4','fin_init_v5','fin_init_v6'];
+    const oldKeys = ['fin_init_v2','fin_init_v3','fin_init_v4','fin_init_v5','fin_init_v6','fin_init_v7'];
     const hasOld  = oldKeys.some(v => localStorage.getItem(v));
     const hasNew  = localStorage.getItem(KEYS.inicializado);
 
-    if (hasOld && !hasNew) {
-      // Migración: conservar movimientos del usuario, actualizar todo lo demás
+    if (!hasNew) {
+      // Conservar movimientos del usuario, re-seed todo lo demás
       const movsGuardados = localStorage.getItem('fin_movimientos');
       oldKeys.forEach(k => localStorage.removeItem(k));
       this._seedConfig();
-      // Restaurar movimientos si existían (no se pierden)
       localStorage.setItem(KEYS.movimientos,
         movsGuardados || JSON.stringify(SEED.movimientos));
       localStorage.setItem(KEYS.inicializado, '1');
-    } else if (!hasNew) {
-      // Instalación nueva
-      this._seedConfig();
-      localStorage.setItem(KEYS.movimientos, JSON.stringify(SEED.movimientos));
-      localStorage.setItem(KEYS.inicializado, '1');
     }
-    // Si ya tiene v7: no tocar nada — los datos del usuario están intactos
+    // Si ya tiene v8: no tocar nada
   },
 
   _seedConfig() {
