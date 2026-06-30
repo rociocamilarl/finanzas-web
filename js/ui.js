@@ -63,8 +63,9 @@ const UI = {
             <div class="stat-value red" style="font-size:14px">${this.clp(gastosFij)}</div>
           </div>
           <div>
-            <div class="stat-label">Teórico</div>
+            <div class="stat-label">Saldo teórico</div>
             <div class="stat-value blue" style="font-size:14px">${this.clp(saldo)}</div>
+            <div style="font-size:9px;color:var(--text-s);margin-top:2px">ingresos − gastos</div>
           </div>
         </div>
         <div class="divider"></div>
