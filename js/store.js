@@ -7,7 +7,7 @@ const KEYS = {
   metas:            'fin_metas',
   plan:             'fin_plan',
   movimientos:      'fin_movimientos',
-  inicializado:     'fin_init_v3'
+  inicializado:     'fin_init_v4'
 };
 
 const Store = {

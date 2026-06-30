@@ -60,8 +60,8 @@ const SEED = {
       fecha: '2026-06-29',
       tipo: 'Saldo inicial',
       categoria: 'Apertura',
-      descripcion: 'Saldo disponible estimado del mes',
-      monto: 937670.895,
+      descripcion: 'Saldo real en cuenta',
+      monto: 755233,
       destino: null
     },
     {
