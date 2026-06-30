@@ -46,8 +46,6 @@ const Store = {
   get(key)      { return JSON.parse(localStorage.getItem(KEYS[key]) || 'null'); },
   set(key, val) {
     localStorage.setItem(KEYS[key], JSON.stringify(val));
-    // Sincronizar con la nube después de cada cambio
-    if (typeof Cloud !== 'undefined' && Cloud.isReady()) Cloud.scheduleSave();
   },
 
   getSupuestos()        { return this.get('supuestos'); },
