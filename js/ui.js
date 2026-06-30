@@ -29,6 +29,7 @@ const UI = {
     const ingresos   = Calc.totalIngresos();
     const gastosFij  = Calc.totalGastosFijos();
     const saldo      = Calc.saldoDisponible();
+    const saldoReal  = Calc.saldoReal();
     const pctGasto   = Calc.porcentaje(gastosFij, ingresos);
     const metas      = Store.getMetas();
     const plan       = Store.getPlan();
@@ -63,8 +64,9 @@ const UI = {
           </div>
         </div>
         <div class="divider"></div>
-        <div class="stat-label">Saldo disponible</div>
-        <div class="card-big-number ${saldo >= 0 ? '' : 'red'}">${this.clp(saldo)}</div>
+        <div class="stat-label">Saldo real en cuenta</div>
+        <div class="card-big-number ${saldoReal >= 0 ? '' : 'red'}">${this.clp(saldoReal)}</div>
+        <div class="card-sub">Teórico (ingresos − gastos fijos): ${this.clp(saldo)}</div>
         <div class="progress-wrap mt-4">
           <div class="progress-header">
             <span>% gasto / ingreso</span><span>${this.pct(pctGasto)}</span>

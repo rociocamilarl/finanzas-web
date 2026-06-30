@@ -15,6 +15,17 @@ const Calc = {
     return this.totalIngresos() - this.totalGastosFijos();
   },
 
+  // Saldo real: parte del saldo inicial y aplica todos los movimientos posteriores
+  saldoReal() {
+    const movs = Store.getMovimientos();
+    let saldo = 0;
+    for (const m of movs) {
+      if (m.tipo === 'Saldo inicial') { saldo = m.monto; }
+      else { saldo += m.monto; }
+    }
+    return saldo;
+  },
+
   // Saldo total Fondo Solidario (MO-2024 + MO-2025 + CP-2026)
   saldoTotalSolidario() {
     return Store.getDeudasSolidario().reduce((s, d) => s + d.saldo, 0);
