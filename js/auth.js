@@ -1,4 +1,4 @@
-const PASS_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // "password" — cámbiala
+const PASS_HASH = '4a1b2a0b6b8c7d81f60b85afcd79b2c51a93fc55807f4fc461dabf129ff720fb';
 
 const Auth = {
   SESSION_KEY: 'fin_session',
