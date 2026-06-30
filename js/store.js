@@ -7,15 +7,17 @@ const KEYS = {
   metas:            'fin_metas',
   plan:             'fin_plan',
   movimientos:      'fin_movimientos',
-  inicializado:     'fin_init_v4'
+  inicializado:     'fin_init_v5'
 };
 
 const Store = {
   init() {
-    // Limpiar versiones anteriores para forzar re-seed
-    if ((localStorage.getItem('fin_init_v2') || localStorage.getItem('fin_init_v3')) && !localStorage.getItem(KEYS.inicializado)) {
+    // Limpiar cualquier versión anterior para forzar re-seed con datos actualizados
+    const viejasVersiones = ['fin_init_v2','fin_init_v3','fin_init_v4'];
+    if (viejasVersiones.some(v => localStorage.getItem(v)) && !localStorage.getItem(KEYS.inicializado)) {
       ['fin_supuestos','fin_ingresos','fin_gastos_fijos','fin_deudas_solidario',
-       'fin_metas','fin_plan','fin_movimientos','fin_init_v2','fin_init_v3'].forEach(k => localStorage.removeItem(k));
+       'fin_metas','fin_plan','fin_movimientos',
+       'fin_init_v2','fin_init_v3','fin_init_v4'].forEach(k => localStorage.removeItem(k));
     }
     if (!localStorage.getItem(KEYS.inicializado)) {
       localStorage.setItem(KEYS.supuestos,        JSON.stringify(SEED.supuestos));
