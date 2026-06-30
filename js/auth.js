@@ -1,80 +1,149 @@
-// Autenticación con contraseña hasheada (SHA-256 via Web Crypto)
+// OAuth — Google Drive + OneDrive
+// ⚠️  Reemplaza estos IDs con los tuyos antes de desplegar
+const GOOGLE_CLIENT_ID    = 'TU_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+const MICROSOFT_CLIENT_ID = 'TU_MICROSOFT_CLIENT_ID';
+
 const Auth = {
   SESSION_KEY: 'fin_auth_session',
-  PASS_KEY:    'fin_auth_hash',
-  // Hash SHA-256 de "rocio2026" (contraseña por defecto)
-  DEFAULT_HASH: '4a1b2a0b6b8c7d81f60b85afcd79b2c51a93fc55807f4fc461dabf129ff720fb',
-
-  async hash(str) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  },
-
-  getStoredHash() {
-    return localStorage.getItem(this.PASS_KEY) || this.DEFAULT_HASH;
-  },
+  msalApp: null,
 
   isAuthenticated() {
-    return sessionStorage.getItem(this.SESSION_KEY) === '1';
+    return !!sessionStorage.getItem(this.SESSION_KEY);
   },
 
-  setSession() {
-    sessionStorage.setItem(this.SESSION_KEY, '1');
+  saveSession(user) {
+    sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(user));
+  },
+
+  getUser() {
+    try { return JSON.parse(sessionStorage.getItem(this.SESSION_KEY)); } catch { return null; }
   },
 
   logout() {
     sessionStorage.removeItem(this.SESSION_KEY);
+    Cloud.init(null, null);
     location.reload();
   },
 
-  async verify(password) {
-    const h = await this.hash(password);
-    // Primera vez: comparar con hash precalculado del default
-    const stored = this.getStoredHash();
-    // Si aún es el default, usamos comparación directa de hash
-    return h === stored;
-  },
-
-  async changePassword(oldPass, newPass) {
-    const oldHash = await this.hash(oldPass);
-    if (oldHash !== this.getStoredHash()) return false;
-    const newHash = await this.hash(newPass);
-    localStorage.setItem(this.PASS_KEY, newHash);
-    return true;
-  },
-
   init() {
-    const screen = document.getElementById('login-screen');
-    const form   = document.getElementById('login-form');
-    const input  = document.getElementById('login-pass');
-    const error  = document.getElementById('login-error');
+    Store.init();
 
     if (this.isAuthenticated()) {
-      screen.classList.add('hidden');
+      // Sesión activa — intentar recargar datos de la nube si hay token guardado
+      const u = this.getUser();
+      if (u?.token) {
+        Cloud.init(u.provider, u.token);
+        Cloud.load().then(d => { if (d) Store.importar(JSON.stringify(d)); });
+      }
+      document.getElementById('login-screen').classList.add('hidden');
+      App.init();
       return;
     }
 
-    // Mostrar pantalla de login
     document.getElementById('app').style.visibility = 'hidden';
+  },
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const pass = input.value;
-      if (!pass) return;
+  // ── Google ───────────────────────────────────────────────────
+  loginGoogle() {
+    if (typeof google === 'undefined') {
+      UI.showToast('Cargando Google... intenta en un momento');
+      return;
+    }
+    this._setLoading('google', true);
 
-      const ok = await this.verify(pass);
-      if (ok) {
-        this.setSession();
-        screen.classList.add('hidden');
-        document.getElementById('app').style.visibility = 'visible';
-        App.init();
-      } else {
-        error.classList.add('show');
-        input.value = '';
-        input.classList.add('shake');
-        input.addEventListener('animationend', () => input.classList.remove('shake'), { once: true });
-        setTimeout(() => error.classList.remove('show'), 3000);
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: 'email profile https://www.googleapis.com/auth/drive.appdata',
+      callback: async resp => {
+        if (resp.error) {
+          this._setLoading('google', false);
+          UI.showToast('No se pudo conectar con Google');
+          return;
+        }
+        const info = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: { Authorization: `Bearer ${resp.access_token}` }
+        }).then(r => r.json());
+
+        await this._afterLogin('google', resp.access_token, info.email, info.name || info.email);
       }
+    });
+    client.requestAccessToken({ prompt: '' });
+  },
+
+  // ── Microsoft ────────────────────────────────────────────────
+  async loginMicrosoft() {
+    this._setLoading('microsoft', true);
+    try {
+      if (!this.msalApp) {
+        await this._loadMsal();
+        this.msalApp = new msal.PublicClientApplication({
+          auth: {
+            clientId: MICROSOFT_CLIENT_ID,
+            authority: 'https://login.microsoftonline.com/common',
+            redirectUri: location.origin + location.pathname
+          },
+          cache: { cacheLocation: 'sessionStorage' }
+        });
+        await this.msalApp.initialize();
+      }
+
+      const result = await this.msalApp.loginPopup({
+        scopes: ['User.Read', 'Files.ReadWrite.AppFolder']
+      });
+      const tokenResp = await this.msalApp.acquireTokenSilent({
+        scopes: ['Files.ReadWrite.AppFolder'],
+        account: result.account
+      });
+
+      await this._afterLogin(
+        'microsoft',
+        tokenResp.accessToken,
+        result.account.username,
+        result.account.name || result.account.username
+      );
+    } catch (e) {
+      console.error(e);
+      this._setLoading('microsoft', false);
+      UI.showToast('No se pudo conectar con Microsoft');
+    }
+  },
+
+  // ── Lógica común post-login ──────────────────────────────────
+  async _afterLogin(provider, token, email, name) {
+    Cloud.init(provider, token);
+
+    UI.showToast('Sincronizando datos...');
+    const cloudData = await Cloud.load();
+    if (cloudData) {
+      Store.importar(JSON.stringify(cloudData));
+    } else {
+      // Primera vez: subir datos locales a la nube
+      await Cloud.save();
+    }
+
+    this.saveSession({ provider, token, email, name });
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').style.visibility = 'visible';
+    UI.showToast(`Hola, ${name.split(' ')[0]} 👋`);
+    App.init();
+  },
+
+  _setLoading(provider, loading) {
+    const btn = document.getElementById(`btn-${provider}`);
+    if (!btn) return;
+    btn.disabled = loading;
+    const labels = { google: 'Entrar con Google', microsoft: 'Entrar con Microsoft' };
+    btn.querySelector('.btn-label').textContent = loading ? 'Conectando...' : labels[provider];
+  },
+
+  _loadMsal() {
+    return new Promise((res, rej) => {
+      if (typeof msal !== 'undefined') { res(); return; }
+      const s = document.createElement('script');
+      s.src = 'https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js';
+      s.onload  = res;
+      s.onerror = rej;
+      document.head.appendChild(s);
     });
   }
 };

@@ -7,32 +7,48 @@ const KEYS = {
   metas:            'fin_metas',
   plan:             'fin_plan',
   movimientos:      'fin_movimientos',
-  inicializado:     'fin_init_v6'
+  inicializado:     'fin_init_v7'
 };
 
 const Store = {
   init() {
-    // Limpiar cualquier versión anterior para forzar re-seed con datos actualizados
-    const viejasVersiones = ['fin_init_v2','fin_init_v3','fin_init_v4','fin_init_v5'];
-    if (viejasVersiones.some(v => localStorage.getItem(v)) && !localStorage.getItem(KEYS.inicializado)) {
-      ['fin_supuestos','fin_ingresos','fin_gastos_fijos','fin_deudas_solidario',
-       'fin_metas','fin_plan','fin_movimientos',
-       'fin_init_v2','fin_init_v3','fin_init_v4'].forEach(k => localStorage.removeItem(k));
-    }
-    if (!localStorage.getItem(KEYS.inicializado)) {
-      localStorage.setItem(KEYS.supuestos,        JSON.stringify(SEED.supuestos));
-      localStorage.setItem(KEYS.ingresos,         JSON.stringify(SEED.ingresos));
-      localStorage.setItem(KEYS.gastos_fijos,     JSON.stringify(SEED.gastos_fijos));
-      localStorage.setItem(KEYS.deudas_solidario, JSON.stringify(SEED.deudas_solidario));
-      localStorage.setItem(KEYS.metas,            JSON.stringify(SEED.metas));
-      localStorage.setItem(KEYS.plan,             JSON.stringify(SEED.plan_asignacion));
-      localStorage.setItem(KEYS.movimientos,      JSON.stringify(SEED.movimientos));
+    const oldKeys = ['fin_init_v2','fin_init_v3','fin_init_v4','fin_init_v5','fin_init_v6'];
+    const hasOld  = oldKeys.some(v => localStorage.getItem(v));
+    const hasNew  = localStorage.getItem(KEYS.inicializado);
+
+    if (hasOld && !hasNew) {
+      // Migración: conservar movimientos del usuario, actualizar todo lo demás
+      const movsGuardados = localStorage.getItem('fin_movimientos');
+      oldKeys.forEach(k => localStorage.removeItem(k));
+      this._seedConfig();
+      // Restaurar movimientos si existían (no se pierden)
+      localStorage.setItem(KEYS.movimientos,
+        movsGuardados || JSON.stringify(SEED.movimientos));
+      localStorage.setItem(KEYS.inicializado, '1');
+    } else if (!hasNew) {
+      // Instalación nueva
+      this._seedConfig();
+      localStorage.setItem(KEYS.movimientos, JSON.stringify(SEED.movimientos));
       localStorage.setItem(KEYS.inicializado, '1');
     }
+    // Si ya tiene v7: no tocar nada — los datos del usuario están intactos
+  },
+
+  _seedConfig() {
+    localStorage.setItem(KEYS.supuestos,        JSON.stringify(SEED.supuestos));
+    localStorage.setItem(KEYS.ingresos,         JSON.stringify(SEED.ingresos));
+    localStorage.setItem(KEYS.gastos_fijos,     JSON.stringify(SEED.gastos_fijos));
+    localStorage.setItem(KEYS.deudas_solidario, JSON.stringify(SEED.deudas_solidario));
+    localStorage.setItem(KEYS.metas,            JSON.stringify(SEED.metas));
+    localStorage.setItem(KEYS.plan,             JSON.stringify(SEED.plan_asignacion));
   },
 
   get(key)      { return JSON.parse(localStorage.getItem(KEYS[key]) || 'null'); },
-  set(key, val) { localStorage.setItem(KEYS[key], JSON.stringify(val)); },
+  set(key, val) {
+    localStorage.setItem(KEYS[key], JSON.stringify(val));
+    // Sincronizar con la nube después de cada cambio
+    if (typeof Cloud !== 'undefined' && Cloud.isReady()) Cloud.scheduleSave();
+  },
 
   getSupuestos()        { return this.get('supuestos'); },
   setSupuestos(v)       { this.set('supuestos', v); },
@@ -56,8 +72,7 @@ const Store = {
   },
 
   deleteMovimiento(id) {
-    const movs = this.getMovimientos().filter(m => m.id !== id);
-    this.setMovimientos(movs);
+    this.setMovimientos(this.getMovimientos().filter(m => m.id !== id));
   },
 
   exportar() {
